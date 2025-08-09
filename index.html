@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rapid Clarity Trainer (MVP)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+}
+h1 { color: #00ffcc; margin-bottom: 10px; }
+button {
+    background: #00ffcc;
+    border: none;
+    color: #000;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+button:hover { background: #00e6b8; }
+#breathingCircle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00ffcc 0%, #00665c 100%);
+    margin: 20px auto;
+    animation: none;
+}
+@keyframes breatheIn { from { transform: scale(1); } to { transform: scale(1.5); } }
+@keyframes breatheOut { from { transform: scale(1.5); } to { transform: scale(1); } }
+#scenario {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    max-width: 300px;
+    text-align: center;
+}
+.option {
+    background: rgba(255,255,255,0.2);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.option:hover { background: rgba(0,255,204,0.4); }
+#feedback { margin-top: 10px; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Rapid Clarity Trainer (MVP)</h1>
+
+<!-- Neuro-Priming Section -->
+<section id="neuroPriming">
+    <h2>1. Neuro-Priming</h2>
+    <p id="breathText">Tap Start to begin calm breathing…</p>
+    <div id="breathingCircle"></div>
+    <button onclick="startBreathing()">Start Neuro-Priming</button>
+</section>
+
+<!-- Speed Decision Section -->
+<section id="speedDecision">
+    <h2>2. Speed Decision Drill</h2>
+    <button onclick="startScenario()">Start Scenario</button>
+    <div id="scenario" style="display:none;">
+        <p id="scenarioText"></p>
+        <div id="options"></div>
+        <div id="timer"></div>
+        <div id="feedback"></div>
+    </div>
+</section>
+
+<script>
+let breathingStep = 0;
+function startBreathing() {
+    const breathText = document.getElementById('breathText');
+    const circle = document.getElementById('breathingCircle');
+    breathingStep = 0;
+    breathText.textContent = "Inhale…";
+    circle.style.animation = "breatheIn 4s forwards";
+    setTimeout(() => {
+        breathText.textContent = "Exhale…";
+        circle.style.animation = "breatheOut 6s forwards";
+    }, 4000);
+    setTimeout(() => startBreathing(), 10000);
+}
+
+const scenarios = [
+    {
+        text: "You see smoke coming from the kitchen. What’s your first move?",
+        options: [
+            {text:"Call emergency services", correct:true},
+            {text:"Investigate without calling", correct:false},
+            {text:"Ignore it", correct:false}
+        ]
+    },
+    {
+        text: "You’re crossing a street and a car speeds toward you. What do you do?",
+        options: [
+            {text:"Run forward to clear the lane", correct:true},
+            {text:"Freeze in place", correct:false},
+            {text:"Walk slowly", correct:false}
+        ]
+    },
+    {
+        text: "In a meeting, you’re asked a hard question you didn’t expect. What’s your move?",
+        options: [
+            {text:"Pause, acknowledge, then give your best concise answer", correct:true},
+            {text:"Panic and ramble", correct:false},
+            {text:"Say nothing", correct:false}
+        ]
+    }
+];
+
+let timerInterval;
+function startScenario() {
+    const scenarioEl = document.getElementById('scenario');
+    const optionsEl = document.getElementById('options');
+    const feedbackEl = document.getElementById('feedback');
+    const timerEl = document.getElementById('timer');
+    feedbackEl.textContent = "";
+    scenarioEl.style.display = "block";
+    const s = scenarios[Math.floor(Math.random() * scenarios.length)];
+    document.getElementById('scenarioText').textContent = s.text;
+    optionsEl.innerHTML = "";
+    s.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = "option";
+        div.textContent = opt.text;
+        div.onclick = () => {
+            clearInterval(timerInterval);
+            feedbackEl.textContent = opt.correct ? "✅ Correct" : "❌ Incorrect";
+        };
+        optionsEl.appendChild(div);
+    });
+    let timeLeft = 3;
+    timerEl.textContent = "⏳ " + timeLeft + "s remaining";
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = "⏳ " + timeLeft + "s remaining";
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            feedbackEl.textContent = "⏱ Time's up!";
+        }
+    }, 1000);
+}
+</script>
+</body>
+</html>
