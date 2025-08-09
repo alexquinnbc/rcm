@@ -1,1 +1,282 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rapid Clarity Trainer — Glassmorphic MVP</title>
+  <meta name="description" content="Single-file Rapid Clarity Trainer: neuro-priming, speed-decision, working memory, spot-the-change, and performance tracking. Glassmorphism, mobile-first, offline." />
+  <style>
+    /* ------- Base / Reset ------- */
+    :root{
+      --bg:#071017; --glass-bg: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
+      --accent: #00FFD1; --accent-2: #6EE7B7; --muted: #B7EFD7; --glass-blur: 10px;
+      --radius: 16px; --shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --card-w: 960px; --max-w: 980px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:#E6FDF4}
+    body{background: radial-gradient(1200px 600px at 10% 10%, rgba(0,255,204,0.06), transparent 8%), linear-gradient(180deg,#031018 0%, #071017 60%); display:flex; align-items:flex-start; justify-content:center; padding:28px;}
+
+    /* ------- Shell ------- */
+    .app{width:100%;max-width:var(--max-w);margin:24px;}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#00A8FF);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,255,209,0.08);font-weight:700}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color: #BFEFDF;opacity:0.9}
+
+    /* ------- Layout Grid ------- */
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+
+    /* ------- Glass Card ------- */
+    .card{background:var(--glass-bg);backdrop-filter: blur(var(--glass-blur));border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 8px 0;color:var(--accent)}
+
+    /* ------- Controls ------- */
+    .row{display:flex;gap:8px;align-items:center}
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;padding:10px 14px;border-radius:10px;color:#042523;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;cursor:pointer}
+    button:active{transform:translateY(1px)}
+
+    /* ------- Breathing Circle ------- */
+    .breath-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .breath-circle{width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .breath-core{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg, rgba(0,255,209,0.18), rgba(0,160,255,0.12));display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;transition:transform 600ms cubic-bezier(.2,.9,.2,1)}
+    .breath-mode{font-size:13px;color:var(--muted)}
+
+    /* breathing anim states */
+    .breathing-in .breath-core{transform:scale(1.35)}
+    .breathing-out .breath-core{transform:scale(0.92)}
+
+    /* ------- Scenario Card ------- */
+    .scenario-text{font-size:15px;margin-bottom:12px}
+    .options{display:grid;grid-template-columns:1fr;gap:8px}
+    .opt{padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);cursor:pointer;border:1px solid transparent}
+    .opt:hover{border-color:rgba(0,255,200,0.12)}
+    .opt.correct{background:linear-gradient(90deg, rgba(0,255,200,0.09), rgba(0,255,175,0.04));border-color:rgba(0,255,160,0.14)}
+    .opt.wrong{background:linear-gradient(90deg, rgba(255,60,60,0.06), rgba(255,60,60,0.02));border-color:rgba(255,60,60,0.12)}
+
+    .timer{font-weight:700;color:var(--accent);font-size:14px}
+
+    /* ------- Extra drills ------- */
+    .mem-grid{display:flex;flex-direction:column;gap:12px}
+    .mem-row{display:flex;gap:10px;align-items:center}
+    .mem-disp{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;min-width:72px;text-align:center}
+
+    /* ------- Spot the change ------- */
+    .scene{display:flex;gap:12px;align-items:center;justify-content:center}
+    .image-placeholder{width:260px;height:160px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;color:#9FEBD7}
+
+    /* ------- Stats ------- */
+    .stat{display:flex;flex-direction:column;align-items:flex-start}
+    .stat strong{font-size:22px;color:var(--accent)}
+
+    footer{margin-top:16px;text-align:center;color:#95EBD0;opacity:0.9}
+
+    /* accessibility */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">RC</div>
+      <div>
+        <h1>Rapid Clarity Trainer — Glassmorphic MVP</h1>
+        <p class="lead">Neuro-priming, speed decisions, working memory, spot-the-change. Mobile-first, offline, single file.</p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: Primary drills -->
+      <section class="card" id="left">
+        <!-- Neuro-Priming -->
+        <div style="margin-bottom:14px">
+          <h3>Neuro-Priming</h3>
+          <div class="breath-wrap">
+            <div id="breathCircle" class="breath-circle">
+              <div id="breathCore" class="breath-core">Ready</div>
+            </div>
+            <div class="row" style="justify-content:center">
+              <div class="breath-mode" id="breathMode">Mode: Calm (4s inhale / 6s exhale)</div>
+            </div>
+            <div class="row" style="justify-content:center;margin-top:8px">
+              <button class="primary" id="startBreath">Start Session</button>
+              <button class="ghost" id="stopBreath">Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0">
+
+        <!-- Speed Decision Drill -->
+        <div style="margin-bottom:12px">
+          <h3>Speed Decision Drill</h3>
+          <p class="scenario-text">Get a short scenario — choose the best action in the timer window. This trains fast assessment + selection.</p>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <button class="primary" id="startScenario">New Scenario</button>
+            <button class="ghost" id="replayScenario">Replay</button>
+            <div class="timer" id="scenarioTimer">⏳ —</div>
+          </div>
+
+          <div id="scenarioCard" style="display:none">
+            <div id="scenarioText" style="margin-bottom:10px;font-weight:600"></div>
+            <div class="options" id="scenarioOptions"></div>
+            <div id="scenarioFeedback" style="margin-top:10px;font-weight:700"></div>
+          </div>
+        </div>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0">
+
+        <!-- Working memory (MVP simple) -->
+        <div>
+          <h3>Working Memory Drill</h3>
+          <p class="scenario-text">Remember and repeat a short sequence under time pressure. Start easy and progress difficulty.</p>
+          <div class="mem-grid">
+            <div class="mem-row">
+              <div class="mem-disp" id="memSequence">—</div>
+              <div style="display:flex;gap:8px">
+                <button class="primary" id="startMem">Show Sequence</button>
+                <button class="ghost" id="submitMem">Submit Answer</button>
+              </div>
+            </div>
+            <input id="memInput" type="text" placeholder="Type sequence here" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+            <div id="memFeedback"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: Sidebar / Stats / Spot the change -->
+      <aside class="card" id="right">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <h3>Performance</h3>
+            <div style="font-size:13px;color:var(--muted)">Quick metrics stored locally</div>
+          </div>
+          <div class="stat">
+            <strong id="scoreVal">—</strong>
+            <div style="font-size:12px;color:var(--muted)">Clarity score</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button class="primary" id="resetStats">Reset</button>
+            <button class="ghost" id="exportStats">Export</button>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Recent results</div>
+          <div id="recentList" style="max-height:180px;overflow:auto;padding-right:6px"></div>
+        </div>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+
+        <div>
+          <h3>Spot the Change (mini)</h3>
+          <div class="scene" style="flex-direction:column">
+            <div class="image-placeholder" id="sceneLeft">Scene A</div>
+            <div style="height:8px"></div>
+            <div class="image-placeholder" id="sceneRight">Scene B</div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="primary" id="startSpot">Generate</button>
+            <button class="ghost" id="revealSpot">Reveal</button>
+          </div>
+          <div id="spotFeedback" style="margin-top:8px;font-weight:700"></div>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer>
+      Tip: Use short daily sessions (5–15 minutes). Increase difficulty gradually. Saved locally in your browser.
+    </footer>
+  </div>
+
+  <script>
+    // -------------------- Utilities --------------------
+    const q = sel => document.querySelector(sel);
+    const el = id => document.getElementById(id);
+
+    // -------------------- Storage / Stats --------------------
+    const STORAGE_KEY = 'rc_trainer_v1';
+    function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{history:[],score:0}}catch(e){return {history:[],score:0}}}
+    function saveState(s){localStorage.setItem(STORAGE_KEY,JSON.stringify(s))}
+    let state = loadState();
+    function pushResult(type,score,meta){state.history.unshift({ts:Date.now(),type,score,meta}); state.score = Math.round(calcScore()); saveState(state); renderStats()}
+    function calcScore(){ if(!state.history.length) return 0; const recent = state.history.slice(0,10); const avg = recent.reduce((s,r)=>s+r.score,0)/recent.length; return avg}
+    function renderStats(){ el('scoreVal').textContent = state.score || '—'; const recent = state.history.slice(0,20); const recentList = el('recentList'); recentList.innerHTML=''; recent.forEach(r=>{const d = new Date(r.ts); const div=document.createElement('div'); div.style.padding='8px'; div.style.borderBottom='1px solid rgba(255,255,255,0.02)'; div.style.fontSize='13px'; div.innerHTML = `<div style="font-weight:700">${r.type} — ${r.score}</div><div style='font-size:12px;color:var(--muted)'>${d.toLocaleString()}</div>`; recentList.appendChild(div) }); }
+    renderStats();
+
+    // -------------------- Neuro-Priming --------------------
+    let breathTimer=null; let breathState='stopped'; // states: stopped, breathing
+    const startBreathBtn = el('startBreath'); const stopBreathBtn = el('stopBreath');
+    startBreathBtn.addEventListener('click',()=>{
+      if(breathState==='breathing') return; breathState='breathing'; runBreathingCycle(); startBreathBtn.textContent='Running...'; startBreathBtn.disabled=true;
+    });
+    stopBreathBtn.addEventListener('click',()=>{breathState='stopped'; startBreathBtn.textContent='Start Session'; startBreathBtn.disabled=false; clearTimeout(breathTimer); el('breathCore').textContent='Ready'; document.getElementById('breathCircle').classList.remove('breathing-in','breathing-out');})
+
+    function runBreathingCycle(){ if(breathState!=='breathing') return; const core = el('breathCore'); const circle = document.getElementById('breathCircle'); // Calm mode: inhale 4s / exhale 6s -> full cycle 10s
+      core.textContent='Inhale'; circle.classList.remove('breathing-out'); circle.classList.add('breathing-in'); setTimeout(()=>{ if(breathState!=='breathing') return; core.textContent='Exhale'; circle.classList.remove('breathing-in'); circle.classList.add('breathing-out'); setTimeout(()=>{ if(breathState!=='breathing') return; core.textContent='Ready'; // short pause between cycles
+          breathTimer = setTimeout(runBreathingCycle,600);
+        },6000);
+      },4000);
+    }
+
+    // -------------------- Scenarios --------------------
+    const SCENARIOS = [
+      {text:"You see smoke coming from the kitchen. What's your first move?", options:[{t:'Call emergency services',c:true},{t:'Investigate without calling',c:false},{t:'Ignore it',c:false}]},
+      {text:"A car speeds toward you while crossing. Best immediate move?", options:[{t:'Jump back to safety',c:true},{t:'Freeze in place',c:false},{t:'Walk forward slowly',c:false}]},
+      {text:"During a live presentation you lose your notes. Best response?", options:[{t:'Pause, breathe, and summarize key point',c:true},{t:'Panic and rush',c:false},{t:'Apologize repeatedly',c:false}]},
+      {text:"A teammate blames you publicly for an error. Best short action?", options:[{t:'Acknowledge, propose corrective step',c:true},{t:'Defend aggressively',c:false},{t:'Say nothing',c:false}]}
+    ];
+
+    let currentScenario=null; let scenarioTimeout=null; let scenarioStart=0;
+    el('startScenario').addEventListener('click',genScenario);
+    el('replayScenario').addEventListener('click',()=>{ if(currentScenario) presentScenario(currentScenario, true) });
+
+    function genScenario(){ currentScenario = SCENARIOS[Math.floor(Math.random()*SCENARIOS.length)]; presentScenario(currentScenario); }
+
+    function presentScenario(s,allowReplay=false){ el('scenarioCard').style.display='block'; el('scenarioText').textContent = s.text; const opts = el('scenarioOptions'); opts.innerHTML=''; el('scenarioFeedback').textContent=''; let timeLeft=3; el('scenarioTimer').textContent = `⏳ ${timeLeft}s`;
+      s.options.forEach((o,i)=>{ const d = document.createElement('div'); d.className='opt'; d.setAttribute('role','button'); d.setAttribute('tabindex','0'); d.textContent = o.t; d.onclick = () => selectOption(d,o); d.onkeydown = (ev)=>{ if(ev.key==='Enter') selectOption(d,o) }; opts.appendChild(d) });
+      scenarioStart = Date.now(); clearInterval(scenarioTimeout); scenarioTimeout = setInterval(()=>{ timeLeft--; el('scenarioTimer').textContent = `⏳ ${timeLeft}s`; if(timeLeft<=0){ clearInterval(scenarioTimeout); el('scenarioFeedback').textContent='⏱ Time\'s up!'; pushResult('scenario',0,{text:s.text}); markOptionsDisabled(); } },1000);
+    }
+
+    function selectOption(dom,opt){ clearInterval(scenarioTimeout); markOptionsDisabled(); if(opt.c){ dom.classList.add('correct'); el('scenarioFeedback').textContent='✅ Good choice'; const rt = Math.max(0,3000 - (Date.now()-scenarioStart)); const score = Math.round((3000 - (Date.now()-scenarioStart))/30); pushResult('scenario',score,{choice:opt.t}); } else { dom.classList.add('wrong'); el('scenarioFeedback').textContent='❌ Not ideal'; pushResult('scenario',10,{choice:opt.t}); } }
+    function markOptionsDisabled(){ const nodes = document.querySelectorAll('.opt'); nodes.forEach(n=>{ n.style.pointerEvents='none' }) }
+
+    // -------------------- Working Memory Drill --------------------
+    let memSeq = []; let memShowing=false;
+    el('startMem').addEventListener('click',()=>{ startMemorySequence(4) });
+    el('submitMem').addEventListener('click',()=>{ const ans = el('memInput').value.trim(); const expected = memSeq.join(' '); if(!expected){ el('memFeedback').textContent='Generate sequence first.'; return } const correct = ans===expected; el('memFeedback').textContent = correct? '✅ Correct' : `❌ Incorrect — expected: ${expected}`; pushResult('memory', correct?100:0,{attempt:ans,expected}) })
+
+    function startMemorySequence(len=4){ memSeq = []; for(let i=0;i<len;i++){ memSeq.push(String(Math.floor(Math.random()*9))); } el('memSequence').textContent = memSeq.join(' '); el('memInput').value=''; el('memFeedback').textContent='Memorize the sequence. It will hide in 4s.'; if(memShowing) clearTimeout(memShowing); memShowing = setTimeout(()=>{ el('memSequence').textContent='—'; el('memFeedback').textContent='Now type the sequence exactly, separated by spaces.' },4000); }
+
+    // -------------------- Spot the Change (Mini) --------------------
+    let spotPair=null; el('startSpot').addEventListener('click',generateSpot); el('revealSpot').addEventListener('click',revealSpot);
+    function generateSpot(){ // create two small 'scenes' represented by colored tiles and one changed item
+      const base = Array.from({length:6}).map(()=>Math.random().toString(36).slice(2,4)); const changedIndex = Math.floor(Math.random()*6); const alt = base.slice(); alt[changedIndex] = Math.random().toString(36).slice(2,4);
+      spotPair = {a:base,b:alt,changedIndex}; renderScenes(); el('spotFeedback').textContent='Find the changed tile (1-6).'; }
+    function renderScenes(){ const left = el('sceneLeft'); const right = el('sceneRight'); left.innerHTML=''; right.innerHTML=''; spotPair.a.forEach((t,i)=>{ const box=document.createElement('div'); box.style.width='36px'; box.style.height='36px'; box.style.display='inline-flex'; box.style.alignItems='center'; box.style.justifyContent='center'; box.style.margin='6px'; box.style.background=`linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,255,200,0.02))`; box.style.borderRadius='8px'; box.style.fontSize='12px'; box.textContent=(i+1); left.appendChild(box); }); spotPair.b.forEach((t,i)=>{ const box=document.createElement('div'); box.style.width='36px'; box.style.height='36px'; box.style.display='inline-flex'; box.style.alignItems='center'; box.style.justifyContent='center'; box.style.margin='6px'; box.style.background=`linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01))`; box.style.borderRadius='8px'; box.style.fontSize='12px'; box.textContent=(i+1); right.appendChild(box); }); }
+    function revealSpot(){ if(!spotPair) return; el('spotFeedback').textContent = `Changed tile: ${spotPair.changedIndex+1}`; pushResult('spot',100,{changed:spotPair.changedIndex+1}); }
+
+    // -------------------- Controls: Reset / Export --------------------
+    el('resetStats').addEventListener('click',()=>{ if(confirm('Reset all local stats?')){ state={history:[],score:0}; saveState(state); renderStats(); alert('Reset.'); } });
+    el('exportStats').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(state, null, 2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='rc_trainer_stats.json'; a.click(); URL.revokeObjectURL(url); });
+
+    // -------------------- Init small UI hooks --------------------
+    renderStats();
+
+    // Accessibility: keyboard shortcuts (s=start scenario, b=breath, m=mem, g=generate spot)
+    window.addEventListener('keydown',e=>{
+      if(e.key==='s') genScenario();
+      if(e.key==='b') startBreathBtn.click();
+      if(e.key==='m') startMemorySequence(4);
+      if(e.key==='g') generateSpot();
+    });
+
+  </script>
+</body>
+</html>
